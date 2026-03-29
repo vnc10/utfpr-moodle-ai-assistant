@@ -77,28 +77,33 @@ def main():
         print("No courses found.")
         return
 
-    selected = select_course(courses)
-    course_name = sanitize_filename(selected['fullname'])
+    while True:
+        selected = select_course(courses)
+        course_name = sanitize_filename(selected['fullname'])
 
-    content = get_course_content(token, selected['id'])
-    assign_descriptions = get_course_assignments(token, selected['id'])
+        content = get_course_content(token, selected['id'])
+        assign_descriptions = get_course_assignments(token, selected['id'])
 
-    dl_materials, dl_submissions, use_ai, upload_context = ask_options()
+        dl_materials, dl_submissions, use_ai, upload_context = ask_options()
 
-    context_files = []
-    if upload_context:
-        context_files = load_teacher_context(course_name)
+        context_files = []
+        if upload_context:
+            context_files = load_teacher_context(course_name)
 
-    process_course(
-        token, course_name, content, assign_descriptions,
-        dl_materials, dl_submissions, use_ai, context_files,
-    )
+        process_course(
+            token, course_name, content, assign_descriptions,
+            dl_materials, dl_submissions, use_ai, context_files,
+        )
 
-    if context_files:
-        print("\nCleaning up teacher's context files from Gemini API...")
-        delete_files(context_files)
+        if context_files:
+            print("\nCleaning up teacher's context files from Gemini API...")
+            delete_files(context_files)
 
-    print("\nAll tasks finished!")
+        print("\nAll tasks finished!")
+
+        again = input("\nBack to course selection? (y/n): ").lower()
+        if again != 'y':
+            break
 
 
 if __name__ == "__main__":

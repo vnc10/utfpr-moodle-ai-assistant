@@ -1,0 +1,26 @@
+# Virtual environments
+.venv/
+venv/
+
+# Claude
+.claude/
+
+# IDE
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Downloaded courses (generated at runtime)
+*/Submissions_*/
