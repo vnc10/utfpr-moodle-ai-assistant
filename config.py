@@ -1,7 +1,7 @@
 import os
 
 # Gemini AI
-GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
+GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY")
 GEMINI_MODEL = "gemini-2.5-flash-lite"
 
 # UTFPR Moodle
