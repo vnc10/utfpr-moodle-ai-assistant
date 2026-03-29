@@ -2,7 +2,7 @@
 
 Ferramenta de linha de comando para professores da UTFPR que automatiza o download de materiais e submissões do Moodle, com correção automática de atividades usando a API do Google Gemini.
 
-## Funcionalidades
+## Funcionalidades principais
 
 - **Autenticação** no Moodle da UTFPR via username/RA e senha.
 - **Download de materiais** do curso (PDFs, slides do Google Docs/Slides, documentos).
@@ -18,7 +18,7 @@ Ferramenta de linha de comando para professores da UTFPR que automatiza o downlo
 - Conta de professor no Moodle da UTFPR.
 - Chave de API do Google Gemini (configurada em `config.py` ou via variável de ambiente `GOOGLE_API_KEY`).
 
-## Instalacao
+## Instalação
 
 ```bash
 # Clone o repositório
@@ -105,16 +105,16 @@ Isso pode ser customizado por disciplina no arquivo `config.py`, através do dic
 | `gemini_ai.py` | Integração com o Gemini (upload, geração de feedback, gerenciamento de arquivos). |
 | `grader.py` | Orquestração da correção: download, avaliação por IA e envio de nota. |
 
-## Configuracao
+## Configuração
 
-As principais configuracoes ficam em `config.py`:
+As principais configurações ficam em `config.py`:
 
-- `GEMINI_API_KEY` — chave da API do Google Gemini
-- `GEMINI_MODEL` — modelo do Gemini utilizado (padrao: `gemini-2.5-flash-lite`)
-- `BASE_URL` — URL base do Moodle (`https://moodle.utfpr.edu.br`)
-- `FORBIDDEN_EXTENSIONS` — extensoes de arquivo ignoradas no download
-- `TEXT_CODE_EXTENSIONS` — extensoes lidas como texto para a IA
-- `MEDIA_EXTENSIONS` — extensoes enviadas via upload para o Gemini
-- `TEACHER_FOLDERS_DEFAULT` — pastas padrao para contexto do professor
-- `TEACHER_FOLDERS_BY_COURSE` — mapeamento customizado de pastas por disciplina
-- `MAX_RETRIES` / `RETRY_DELAY_SECONDS` — configuracao de retry para erros de quota
+- `GEMINI_API_KEY` — Chave da API do Google Gemini.
+- `GEMINI_MODEL` — Modelo do Gemini utilizado (padrão: `gemini-2.5-flash-lite`).
+- `BASE_URL` — URL base do Moodle (`https://moodle.utfpr.edu.br`).
+- `FORBIDDEN_EXTENSIONS` — Extensões de arquivo ignoradas no download.
+- `TEXT_CODE_EXTENSIONS` — Extensões lidas como texto para a IA.
+- `MEDIA_EXTENSIONS` — Extensões enviadas via upload para o Gemini.
+- `TEACHER_FOLDERS_DEFAULT` — Pastas padrão para contexto do professor.
+- `TEACHER_FOLDERS_BY_COURSE` — Mapeamento customizado de pastas por disciplina.
+- `MAX_RETRIES` / `RETRY_DELAY_SECONDS` — Configuração de retry para erros de quota.
