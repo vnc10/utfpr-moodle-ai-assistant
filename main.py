@@ -2,7 +2,11 @@ import getpass
 import os
 
 from downloader import sanitize_filename, download_material
-from gemini_ai import load_teacher_context, delete_files, generate_lesson_plan
+from gemini_ai import (
+    load_teacher_context, delete_files, generate_lesson_plan, markdown_to_docx,
+    list_slide_pdfs, upload_single_slide, load_previous_lesson_plans,
+    find_all_lesson_plans,
+)
 from grader import process_submissions
 from moodle_api import authenticate, list_courses, get_course_content, get_course_assignments
 
@@ -94,38 +98,50 @@ def grade_exercises(token, course_name, content, assign_descriptions):
         delete_files(context_files)
 
 
-def create_lesson_plan(course_name, content):
-    """Generates a lesson plan based on the course content."""
-    context_files = load_teacher_context(course_name)
+def select_slide(slides):
+    """Displays the slide list and returns the selected path."""
+    print("\n--- Available Slides ---")
+    for i, path in enumerate(slides):
+        print(f"[{i}] {os.path.basename(path)}")
+    choice = int(input("\nSelect slide number: "))
+    return slides[choice]
 
-    sections = []
-    for section in content:
-        if not section.get("visible", 1):
-            continue
-        section_name = section.get("name", "Unnamed")
-        modules = []
-        for module in section.get("modules", []):
-            if not module.get("visible", 1):
-                continue
-            modules.append(module.get("name", ""))
-        if modules:
-            sections.append({"name": section_name, "modules": modules})
+
+def create_lesson_plan(course_name):
+    """Generates a lesson plan based on a selected slide and previous plans."""
+    slides = list_slide_pdfs(course_name)
+    if not slides:
+        print("\nNo slides found. Download materials first.")
+        return
+
+    selected_path = select_slide(slides)
+
+    slide_file = upload_single_slide(selected_path)
+    if not slide_file:
+        print("\nFailed to upload slide.")
+        return
+
+    previous_plans_text = load_previous_lesson_plans(course_name)
 
     print("\nGenerating lesson plan with AI...")
-    lesson_plan = generate_lesson_plan(course_name, sections, context_files)
+    lesson_plan = generate_lesson_plan(course_name, slide_file, previous_plans_text)
 
     if lesson_plan:
-        output_path = os.path.join(course_name, "Lesson_Plan.html")
-        os.makedirs(course_name, exist_ok=True)
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(lesson_plan)
+        roteiros_dir = os.path.join(course_name, "Roteiros")
+        os.makedirs(roteiros_dir, exist_ok=True)
+
+        all_plans = find_all_lesson_plans(course_name)
+        next_num = len(all_plans) + 1
+        filename = f"Roteiro_Aula_{next_num:02d}.docx"
+        output_path = os.path.join(roteiros_dir, filename)
+
+        markdown_to_docx(lesson_plan, output_path)
         print(f"\nLesson plan saved to: {output_path}")
     else:
         print("\nFailed to generate lesson plan.")
 
-    if context_files:
-        print("\nCleaning up teacher's context files from Gemini API...")
-        delete_files(context_files)
+    print("\nCleaning up context files from Gemini API...")
+    delete_files([slide_file])
 
 
 def main():
@@ -154,7 +170,7 @@ def main():
         elif action == 1:
             grade_exercises(token, course_name, content, assign_descriptions)
         elif action == 2:
-            create_lesson_plan(course_name, content)
+            create_lesson_plan(course_name)
         else:
             print("Invalid option.")
             continue
