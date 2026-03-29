@@ -1,27 +1,27 @@
 # UTFPR Moodle AI Assistant
 
-Ferramenta de linha de comando para professores da UTFPR que automatiza o download de materiais e submissoes do Moodle, com correcao automatica de atividades usando a API do Google Gemini.
+Ferramenta de linha de comando para professores da UTFPR que automatiza o download de materiais e submissões do Moodle, com correção automática de atividades usando a API do Google Gemini.
 
 ## Funcionalidades
 
-- **Autenticacao** no Moodle da UTFPR via username/RA e senha
-- **Download de materiais** do curso (PDFs, slides do Google Docs/Slides, documentos)
-- **Download de submissoes** dos alunos por atividade
-- **Correcao automatica com IA** (Gemini) gerando feedback em HTML com nota 10
-- **Upload de slides do professor** como contexto para a IA gerar feedbacks mais precisos
-- **Retry automatico** em caso de erro de quota da API do Gemini
-- **Navegacao entre disciplinas** sem precisar reabrir o programa
+- **Autenticação** no Moodle da UTFPR via username/RA e senha.
+- **Download de materiais** do curso (PDFs, slides do Google Docs/Slides, documentos).
+- **Download de submissões** dos alunos por atividade.
+- **Correção automática com IA** (Gemini), gerando feedback em HTML com nota 10.
+- **Upload de slides do professor** como contexto para a IA gerar feedbacks mais precisos.
+- **Retry automático** em caso de erro de quota da API do Gemini.
+- **Navegação entre disciplinas** sem precisar reabrir o programa.
 
-## Pre-requisitos
+## Pré-requisitos
 
 - Python 3.9+
-- Conta de professor no Moodle da UTFPR
-- Chave de API do Google Gemini (configurada em `config.py` ou via variavel de ambiente `GOOGLE_API_KEY`)
+- Conta de professor no Moodle da UTFPR.
+- Chave de API do Google Gemini (configurada em `config.py` ou via variável de ambiente `GOOGLE_API_KEY`).
 
 ## Instalacao
 
 ```bash
-# Clone o repositorio
+# Clone o repositório
 git clone <url-do-repositorio>
 cd utfpr-moodle-ai-assistant
 
@@ -32,7 +32,7 @@ python3 -m venv venv
 source venv/bin/activate   # macOS/Linux
 venv\Scripts\activate      # Windows
 
-# Instale as dependencias
+# Instale as dependências
 pip install google-genai
 ```
 
@@ -46,17 +46,17 @@ source venv/bin/activate
 python main.py
 ```
 
-O programa ira:
+O programa irá:
 
-1. Pedir seu **username/RA** e **senha** do Moodle
-2. Listar suas **disciplinas** disponiveis
+1. Pedir seu **username/RA** e **senha** do Moodle.
+2. Listar suas **disciplinas** disponíveis.
 3. Perguntar o que deseja fazer:
-   - Baixar materiais da disciplina
-   - Baixar submissoes dos alunos
-   - Usar IA para corrigir (opcional)
-   - Enviar slides como contexto para a IA (opcional)
-4. Processar tudo automaticamente
-5. Ao finalizar, perguntar se deseja voltar ao menu de disciplinas
+   - Baixar materiais da disciplina.
+   - Baixar submissões dos alunos.
+   - Usar IA para corrigir (opcional).
+   - Enviar slides como contexto para a IA (opcional).
+4. Processar tudo automaticamente.
+5. Ao finalizar, perguntar se deseja voltar ao menu de disciplinas.
 
 ## Estrutura de pastas gerada
 
@@ -80,30 +80,30 @@ Nome_da_Disciplina/
 └── ...
 ```
 
-- Cada **secao** do Moodle vira uma pasta
-- **Materiais** (PDFs, slides) sao salvos dentro da secao correspondente
-- **Submissoes** ficam em pastas `Submissions_<nome_atividade>`, separadas por aluno (`Student_<id>`)
-- Arquivos binarios (`.exe`, `.o`, `.out`, `.bin`, `.pyc`) sao ignorados automaticamente
-- Arquivos `.zip` enviados por alunos sao extraidos automaticamente
+- Cada **seção** do Moodle vira uma pasta.
+- **Materiais** (PDFs, slides) são salvos dentro da seção correspondente.
+- **Submissões** ficam em pastas `Submissions_<nome_atividade>`, separadas por aluno (`Student_<id>`).
+- Arquivos binários (`.exe`, `.o`, `.out`, `.bin`, `.pyc`) são ignorados automaticamente.
+- Arquivos `.zip` enviados por alunos são extraídos automaticamente.
 
 ## Contexto da IA (slides do professor)
 
-Quando a opcao de enviar slides como contexto esta ativa, o programa busca PDFs dentro de pastas especificas do curso para enviar ao Gemini. Isso permite que o feedback use a mesma terminologia das aulas.
+Quando a opção de enviar slides como contexto está ativa, o programa busca PDFs dentro de pastas específicas do curso para enviar ao Gemini. Isso permite que o feedback use a mesma terminologia das aulas.
 
-**Pastas padrao escaneadas:** `Slides` e `Atividades`
+**Pastas padrão escaneadas:** `Slides` e `Atividades`.
 
-Isso pode ser customizado por disciplina no arquivo `config.py` atraves do dicionario `TEACHER_FOLDERS_BY_COURSE`.
+Isso pode ser customizado por disciplina no arquivo `config.py`, através do dicionário `TEACHER_FOLDERS_BY_COURSE`.
 
 ## Estrutura do projeto
 
-| Arquivo | Descricao |
+| Arquivo | Descrição |
 |---|---|
-| `main.py` | Ponto de entrada, fluxo principal e menu interativo |
-| `config.py` | Configuracoes (API keys, URLs, extensoes, pastas de contexto) |
-| `moodle_api.py` | Comunicacao com a API REST do Moodle (auth, cursos, submissoes, notas) |
-| `downloader.py` | Download de materiais e submissoes (inclui suporte a Google Docs/Slides) |
-| `gemini_ai.py` | Integracao com o Gemini (upload, geracao de feedback, gerenciamento de arquivos) |
-| `grader.py` | Orquestracao da correcao: download, avaliacao por IA e envio de nota |
+| `main.py` | Ponto de entrada, fluxo principal e menu interativo. |
+| `config.py` | Configurações (API keys, URLs, extensões, pastas de contexto). |
+| `moodle_api.py` | Comunicação com a API REST do Moodle (auth, cursos, submissões, notas). |
+| `downloader.py` | Download de materiais e submissões (inclui suporte a Google Docs/Slides). |
+| `gemini_ai.py` | Integração com o Gemini (upload, geração de feedback, gerenciamento de arquivos). |
+| `grader.py` | Orquestração da correção: download, avaliação por IA e envio de nota. |
 
 ## Configuracao
 
