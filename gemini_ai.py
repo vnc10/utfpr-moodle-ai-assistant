@@ -140,14 +140,17 @@ def generate_feedback(course_name, assignment_desc, student_text, student_files,
     public = _get_course_context(course_name)
 
     system_instruction = (
-        f"Voce e um professor universitario formado em Ciencia da Computacao "
+        f"Você é um professor universitário formado em Ciência da Computação "
         f"lecionando a disciplina de '{course_name}' {public}.\n"
-        f"A NOTA DO ALUNO SERA SEMPRE 10, independentemente da qualidade da entrega.\n"
-        f"Sua funcao e gerar um feedback amigavel, educado e construtivo em portugues.\n"
-        f"Utilize os PDFs de contexto fornecidos para manter a terminologia usada em sala de aula.\n"
-        f"Gere a resposta APENAS usando HTML simples (<p>, <ul>, <li>, <strong>, <br>).\n"
-        f"NAO use blocos de codigo Markdown.\n"
-        f"Além disso meu nome é Vinicius Petris, se for citar o nome do professor no feedaback"
+        f"A NOTA DO ALUNO SERÁ SEMPRE 10, independentemente da qualidade da entrega.\n"
+        f"Sua função é gerar um feedback amigável, educado e construtivo em português.\n"
+        f"Utilize os PDFs de contexto fornecidos para manter a terminologia usada em sala de aula.\n\n"
+        f"ATENÇÃO - REGRAS ESTRITAS DE FORMATAÇÃO:\n"
+        f"1. A resposta DEVE ser escrita INTEIRAMENTE em HTML.\n"
+        f"2. É ESTRITAMENTE PROIBIDO o uso de Markdown. NÃO use asteriscos (**) para negrito, use a tag <strong>. NÃO use hifens ou asteriscos (*) para listas, use <ul> e <li>.\n"
+        f"3. Use a tag <br> ou <p> para quebras de linha.\n"
+        f"4. NÃO envolva a resposta em blocos de código (como ```html), retorne o HTML diretamente.\n\n"
+        f"Por fim, não cite nomes próprios. Ao se identificar no final do feedback, assine apenas como 'Professor'."
     )
 
     prompt = f"ENUNCIADO DA TAREFA:\n{assignment_desc}\n\nCONTEUDO DO ALUNO:\n{student_text}"
@@ -181,6 +184,59 @@ def generate_feedback(course_name, assignment_desc, student_text, student_files,
                 time.sleep(RETRY_DELAY_SECONDS)
             else:
                 print(f"      [AI ERROR] Failed to generate feedback: {e}")
+                break
+
+    return None
+
+
+def generate_lesson_plan(course_name, sections, context_files):
+    """Generates a lesson plan via Gemini based on the course structure and materials."""
+    public = _get_course_context(course_name)
+
+    system_instruction = (
+        f"Voce e um professor universitario formado em Ciencia da Computacao "
+        f"lecionando a disciplina de '{course_name}' {public}.\n"
+        f"Sua funcao e gerar um roteiro de aula detalhado e bem estruturado em portugues.\n"
+        f"Utilize os PDFs de contexto fornecidos para manter a terminologia usada em sala de aula.\n"
+        f"O roteiro deve incluir: objetivos da aula, topicos a serem abordados, "
+        f"metodologia sugerida, atividades praticas e referencias.\n"
+        f"Gere a resposta APENAS usando HTML simples (<h1>, <h2>, <p>, <ul>, <li>, <strong>, <br>, <hr>).\n"
+        f"NAO use blocos de codigo Markdown.\n"
+        f"Alem disso meu nome e Vinicius Petris, se for citar o nome do professor no roteiro."
+    )
+
+    course_structure = ""
+    for section in sections:
+        course_structure += f"\nSECAO: {section['name']}\n"
+        for mod in section['modules']:
+            course_structure += f"  - {mod}\n"
+
+    prompt = f"ESTRUTURA DO CURSO:\n{course_structure}\n\nGere um roteiro de aula completo para esta disciplina."
+    contents = [prompt] + context_files
+
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.4,
+                ),
+            )
+
+            return response.text.replace("```html", "").replace("```", "").strip()
+
+        except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                print(
+                    f"      [QUOTA EXCEEDED] Attempt {attempt + 1}/{MAX_RETRIES}. "
+                    f"Waiting {RETRY_DELAY_SECONDS}s..."
+                )
+                time.sleep(RETRY_DELAY_SECONDS)
+            else:
+                print(f"      [AI ERROR] Failed to generate lesson plan: {e}")
                 break
 
     return None
