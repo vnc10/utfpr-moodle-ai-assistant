@@ -3,6 +3,7 @@ import os
 # Gemini AI
 GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY")
 GEMINI_MODEL = "gemini-2.5-flash-lite"
+GEMINI_MODEL_PRO = "models/gemini-3.1-pro-preview"
 
 # UTFPR Moodle
 BASE_URL = "https://moodle.utfpr.edu.br"
