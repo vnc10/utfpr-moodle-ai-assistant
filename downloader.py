@@ -15,7 +15,7 @@ def sanitize_filename(name):
 def download_file(url, filepath):
     """Baixa um arquivo de uma URL e salva no caminho especificado."""
     try:
-        response = requests.get(url, stream=True)
+        response = requests.get(url, stream=True, verify=False)
         response.raise_for_status()
         with open(filepath, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):

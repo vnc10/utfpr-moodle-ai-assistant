@@ -1,7 +1,15 @@
 import sys
+import warnings
+
 import requests
+import urllib3
 
 from config import LOGIN_URL, API_URL
+
+# The UTFPR Moodle server has a misconfigured SSL certificate chain
+# (Basic Constraints of CA cert not marked critical), so we need to
+# disable SSL verification for requests to work.
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def authenticate(username, password):
@@ -12,7 +20,7 @@ def authenticate(username, password):
         "password": password,
         "service": "moodle_mobile_app",
     }
-    response = requests.post(LOGIN_URL, data=data)
+    response = requests.post(LOGIN_URL, data=data, verify=False)
     result = response.json()
 
     if "token" in result:
@@ -32,7 +40,7 @@ def list_courses(token):
         "moodlewsrestformat": "json",
         "classification": "all",
     }
-    response = requests.post(API_URL, data=data)
+    response = requests.post(API_URL, data=data, verify=False)
     all_courses = response.json().get("courses", [])
     return [course for course in all_courses if course.get("visible")]
 
@@ -45,7 +53,7 @@ def get_course_content(token, course_id):
         "moodlewsrestformat": "json",
         "courseid": course_id,
     }
-    return requests.post(API_URL, data=data).json()
+    return requests.post(API_URL, data=data, verify=False).json()
 
 
 def get_course_assignments(token, course_id):
@@ -56,7 +64,7 @@ def get_course_assignments(token, course_id):
         "moodlewsrestformat": "json",
         "courseids[0]": course_id,
     }
-    result = requests.post(API_URL, data=data).json()
+    result = requests.post(API_URL, data=data, verify=False).json()
 
     assign_intros = {}
     for course in result.get("courses", []):
@@ -73,7 +81,7 @@ def get_submissions(token, assignment_id):
         "moodlewsrestformat": "json",
         "assignmentids[0]": assignment_id,
     }
-    result = requests.post(API_URL, data=data).json()
+    result = requests.post(API_URL, data=data, verify=False).json()
 
     assignments = result.get("assignments", [])
     if not assignments:
@@ -99,7 +107,7 @@ def post_grade(token, assignment_id, user_id, feedback_html, grade=10.0):
     }
 
     try:
-        response = requests.post(API_URL, data=data)
+        response = requests.post(API_URL, data=data, verify=False)
         result = response.json()
 
         if result is None:
