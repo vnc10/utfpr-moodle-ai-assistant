@@ -14,7 +14,7 @@ API_URL = f"{BASE_URL}/webservice/rest/server.php"
 FORBIDDEN_EXTENSIONS = ('.exe', '.o', '.out', '.bin', '.app', '.msi', '.pyc')
 
 # Extensoes de codigo-fonte legiveis como texto
-TEXT_CODE_EXTENSIONS = ('.c', '.cpp', '.txt', '.py', '.h', '.java')
+TEXT_CODE_EXTENSIONS = ('.c', '.cpp', '.txt', '.py', '.h', '.java', '.docx')
 
 # Extensoes de midia que o Gemini aceita via upload
 MEDIA_EXTENSIONS = ('.pdf', '.png', '.jpg', '.jpeg')
