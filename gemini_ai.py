@@ -179,7 +179,14 @@ def read_student_files(student_dir):
             filepath = os.path.join(root, filename)
             ext = filename.lower()
 
-            if any(ext.endswith(e) for e in TEXT_CODE_EXTENSIONS):
+            if ext.endswith('.docx'):
+                try:
+                    content = _read_docx_as_text(filepath)
+                    student_text += f"\nFILE: {filename}\n{content}\n"
+                except Exception:
+                    pass
+
+            elif any(ext.endswith(e) for e in TEXT_CODE_EXTENSIONS):
                 try:
                     with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                         student_text += f"\nFILE: {filename}\n{f.read()}\n"
