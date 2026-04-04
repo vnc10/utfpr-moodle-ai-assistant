@@ -10,7 +10,8 @@ Ferramenta de linha de comando para professores da UTFPR que automatiza o downlo
 - **Correção automática com IA** (Gemini), gerando feedback em HTML com nota 10.
 - **Upload de slides do professor** como contexto para a IA gerar feedbacks mais precisos.
 - **Geração de roteiros de aula** (Lesson Plans) a partir dos slides em PDF, exportados como `.docx`.
-- **Continuidade entre aulas** — roteiros anteriores são lidos automaticamente para manter a progressão lógica do conteúdo.
+- **Seleção de roteiros anteriores** como contexto — escolha quais roteiros usar para manter continuidade, economizando tokens.
+- **Integração com Google Docs** — upload automático do roteiro gerado direto para o Google Drive, convertido para Google Docs.
 - **Retry automático** em caso de erro de quota da API do Gemini.
 - **Navegação entre disciplinas** sem precisar reabrir o programa.
 
@@ -19,6 +20,7 @@ Ferramenta de linha de comando para professores da UTFPR que automatiza o downlo
 - Python 3.9+
 - Conta de professor no Moodle da UTFPR.
 - Chave de API do Google Gemini (configurada em `config.py` ou via variável de ambiente `GOOGLE_API_KEY`).
+- (Opcional) Credenciais OAuth2 do Google Cloud para integração com Google Docs (arquivo `credentials.json`).
 
 ## Instalação
 
@@ -35,7 +37,7 @@ source venv/bin/activate   # macOS/Linux
 venv\Scripts\activate      # Windows
 
 # Instale as dependências
-pip install google-genai python-docx
+pip install google-genai python-docx google-api-python-client google-auth-httplib2 google-auth-oauthlib
 ```
 
 ## Como usar
@@ -98,10 +100,24 @@ A opção **Gerar roteiro de aula** permite criar um roteiro detalhado a partir 
 
 1. Lista os PDFs disponíveis nas pastas de slides do curso.
 2. O professor seleciona o slide desejado.
-3. O slide é enviado ao Gemini (modelo `gemini-3.1-pro-preview`) junto com roteiros anteriores para manter continuidade.
-4. O roteiro gerado é convertido de Markdown para `.docx` (Word) e salvo na pasta `Roteiros/`.
+3. Exibe os roteiros anteriores já existentes na pasta `Roteiros/` e permite selecionar quais usar como contexto (índices separados por vírgula, `all` para todos, ou Enter para nenhum).
+4. O slide é enviado ao Gemini (modelo `gemini-3.1-pro-preview`) junto com os roteiros selecionados.
+5. O roteiro gerado é convertido de Markdown para `.docx` (Word) e salvo na pasta `Roteiros/`.
+6. Opcionalmente, o roteiro é enviado ao **Google Docs** automaticamente, com o link exibido no terminal.
 
 Cada roteiro inclui, para cada slide: tempo estimado, roteiro de fala detalhado, foco visual e sugestões de interação com a turma.
+
+## Integração com Google Docs
+
+Para habilitar o upload automático de roteiros para o Google Docs:
+
+1. Acesse o [Google Cloud Console](https://console.cloud.google.com/).
+2. Habilite a **Google Drive API** no seu projeto.
+3. Crie credenciais **OAuth 2.0** do tipo **Desktop App** (tipo: Dados do usuário).
+4. Baixe o JSON e salve como `credentials.json` na raiz do projeto.
+5. Na primeira execução, o navegador abrirá para autorizar o acesso ao Drive. O token será salvo em `token.json` automaticamente para as próximas vezes.
+
+> **Importante:** Não commite `credentials.json` nem `token.json` no repositório.
 
 ## Contexto da IA (slides do professor)
 
@@ -120,6 +136,7 @@ Isso pode ser customizado por disciplina no arquivo `config.py`, através do dic
 | `moodle_api.py` | Comunicação com a API REST do Moodle (auth, cursos, submissões, notas). |
 | `downloader.py` | Download de materiais e submissões (inclui suporte a Google Docs/Slides). |
 | `gemini_ai.py` | Integração com o Gemini (upload, geração de feedback, roteiros de aula, conversão para `.docx`). |
+| `google_drive.py` | Integração com o Google Drive (upload de `.docx` convertido para Google Docs). |
 | `grader.py` | Orquestração da correção: download, avaliação por IA e envio de nota. |
 
 ## Configuração
@@ -136,3 +153,6 @@ As principais configurações ficam em `config.py`:
 - `TEACHER_FOLDERS_DEFAULT` — Pastas padrão para contexto do professor.
 - `TEACHER_FOLDERS_BY_COURSE` — Mapeamento customizado de pastas por disciplina.
 - `MAX_RETRIES` / `RETRY_DELAY_SECONDS` — Configuração de retry para erros de quota.
+- `GOOGLE_CREDENTIALS_FILE` — Caminho do arquivo de credenciais OAuth2 (padrão: `credentials.json`).
+- `GOOGLE_TOKEN_FILE` — Caminho do token salvo após autorização (padrão: `token.json`).
+- `GOOGLE_DRIVE_SCOPES` — Escopos de permissão do Google Drive.

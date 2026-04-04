@@ -4,9 +4,10 @@ import os
 from downloader import sanitize_filename, download_material
 from gemini_ai import (
     load_teacher_context, delete_files, generate_lesson_plan, markdown_to_docx,
-    list_slide_pdfs, upload_single_slide, load_previous_lesson_plans,
-    find_all_lesson_plans,
+    list_slide_pdfs, upload_single_slide, find_all_lesson_plans,
+    _read_docx_as_text,
 )
+from google_drive import upload_to_google_docs
 from grader import process_submissions
 from moodle_api import authenticate, list_courses, get_course_content, get_course_assignments
 
@@ -107,6 +108,51 @@ def select_slide(slides):
     return slides[choice]
 
 
+def select_lesson_plans(course_name):
+    """Displays existing lesson plans and lets the user select which to use as context."""
+    plans = find_all_lesson_plans(course_name)
+    if not plans:
+        print("\nNo previous lesson plans found.")
+        return []
+
+    print("\n--- Available Lesson Plans ---")
+    for i, path in enumerate(plans):
+        print(f"[{i}] {os.path.basename(path)}")
+    print(f"\nSelect plans to use as context (e.g. 0,2,3 or 'all' or press Enter for none):")
+    choice = input(">> ").strip()
+
+    if not choice:
+        return []
+    if choice.lower() == "all":
+        return plans
+
+    selected = []
+    for idx in choice.split(","):
+        idx = idx.strip()
+        if idx.isdigit() and 0 <= int(idx) < len(plans):
+            selected.append(plans[int(idx)])
+    return selected
+
+
+def load_selected_lesson_plans(selected_paths):
+    """Reads selected .docx lesson plans and returns their text content."""
+    if not selected_paths:
+        return ""
+
+    all_text = ""
+    print(f"\n[AI CONTEXT] Loading {len(selected_paths)} selected lesson plan(s)...")
+    for filepath in selected_paths:
+        filename = os.path.basename(filepath)
+        print(f"   -> Reading {filename}...")
+        try:
+            text = _read_docx_as_text(filepath)
+            all_text += f"\n\n--- ROTEIRO ANTERIOR: {filename} ---\n{text}"
+        except Exception as e:
+            print(f"      [WARNING] Could not read {filename}: {e}")
+
+    return all_text
+
+
 def create_lesson_plan(course_name):
     """Generates a lesson plan based on a selected slide and previous plans."""
     slides = list_slide_pdfs(course_name)
@@ -121,7 +167,8 @@ def create_lesson_plan(course_name):
         print("\nFailed to upload slide.")
         return
 
-    previous_plans_text = load_previous_lesson_plans(course_name)
+    selected_plans = select_lesson_plans(course_name)
+    previous_plans_text = load_selected_lesson_plans(selected_plans)
 
     print("\nGenerating lesson plan with AI...")
     lesson_plan = generate_lesson_plan(course_name, slide_file, previous_plans_text)
@@ -137,6 +184,15 @@ def create_lesson_plan(course_name):
 
         markdown_to_docx(lesson_plan, output_path)
         print(f"\nLesson plan saved to: {output_path}")
+
+        upload = input("\nUpload to Google Docs? (y/n): ").lower() == 'y'
+        if upload:
+            print("Uploading to Google Docs...")
+            try:
+                doc_url = upload_to_google_docs(output_path)
+                print(f"Google Docs: {doc_url}")
+            except Exception as e:
+                print(f"[ERROR] Failed to upload to Google Docs: {e}")
     else:
         print("\nFailed to generate lesson plan.")
 
