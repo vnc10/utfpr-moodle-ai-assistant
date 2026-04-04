@@ -28,8 +28,6 @@ def download_file(url, filepath):
 
 def _resolve_google_url(raw_url):
     """Converte URLs do Google Docs/Slides para links de exportacao em PDF."""
-    if "docs.google.com/presentation/d/e/" in raw_url:
-        return None, "shortcut"
     if "docs.google.com/presentation/d/" in raw_url:
         base = raw_url.split("/edit")[0].split("/view")[0].split("/pub")[0]
         return f"{base}/export/pdf", "download"
@@ -92,18 +90,7 @@ def download_material(module, token, save_dir):
         # URLs externas (Google Docs/Slides)
         resolved_url, kind = _resolve_google_url(raw_url)
 
-        if kind == "shortcut":
-            filename = filename.replace(".pdf", ".html")
-            filepath = os.path.join(save_dir, filename)
-            if not os.path.exists(filepath):
-                print(f"   [SAVING SHORTCUT] {filename}...")
-                with open(filepath, "w", encoding="utf-8") as f:
-                    f.write(
-                        f'<html><head><meta http-equiv="refresh" '
-                        f'content="0; url={raw_url}" /></head>'
-                        f'<body>Redirecting...</body></html>'
-                    )
-        elif kind == "download" and resolved_url:
+        if kind == "download" and resolved_url:
             filepath = os.path.join(save_dir, filename)
             if os.path.exists(filepath):
                 print(f"   [SKIPPED] {filename} (Already exists)")

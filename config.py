@@ -30,3 +30,8 @@ TEACHER_FOLDERS_BY_COURSE = {
 # Retry config para erros de quota do Gemini
 MAX_RETRIES = 3
 RETRY_DELAY_SECONDS = 30
+
+# Google Drive OAuth
+GOOGLE_CREDENTIALS_FILE = "credentials.json"
+GOOGLE_TOKEN_FILE = "token.json"
+GOOGLE_DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.file"]
