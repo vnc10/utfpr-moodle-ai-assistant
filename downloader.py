@@ -2,6 +2,8 @@ import os
 import re
 import zipfile
 
+import rarfile
+
 import requests
 
 from config import FORBIDDEN_EXTENSIONS
@@ -121,6 +123,13 @@ def download_submission_file(file_info, token, student_dir):
             try:
                 with zipfile.ZipFile(filepath, 'r') as zip_ref:
                     zip_ref.extractall(student_dir)
+            except Exception as e:
+                print(f"      [ERROR] Failed to extract {filename}: {e}")
+
+        if success and filename.lower().endswith(".rar"):
+            try:
+                with rarfile.RarFile(filepath, 'r') as rar_ref:
+                    rar_ref.extractall(student_dir)
             except Exception as e:
                 print(f"      [ERROR] Failed to extract {filename}: {e}")
 

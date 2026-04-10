@@ -37,7 +37,13 @@ source venv/bin/activate   # macOS/Linux
 venv\Scripts\activate      # Windows
 
 # Instale as dependências
-pip install google-genai python-docx google-api-python-client google-auth-httplib2 google-auth-oauthlib
+pip install google-genai python-docx google-api-python-client google-auth-httplib2 google-auth-oauthlib rarfile
+
+# Instale o unrar (necessário para extrair arquivos .rar)
+# macOS:
+brew install --cask rar
+# Ubuntu/Debian:
+# sudo apt install unrar
 ```
 
 ## Como usar
@@ -91,7 +97,7 @@ Nome_da_Disciplina/
 - **Materiais** (PDFs, slides) são salvos dentro da seção correspondente.
 - **Submissões** ficam em pastas `Submissions_<nome_atividade>`, separadas por aluno (`Student_<id>`).
 - Arquivos binários (`.exe`, `.o`, `.out`, `.bin`, `.pyc`) são ignorados automaticamente.
-- Arquivos `.zip` enviados por alunos são extraídos automaticamente.
+- Arquivos `.zip` e `.rar` enviados por alunos são extraídos automaticamente.
 - **Roteiros de aula** gerados pela IA são salvos na pasta `Roteiros/` com numeração sequencial.
 
 ## Geração de roteiros de aula
